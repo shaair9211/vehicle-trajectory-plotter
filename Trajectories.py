@@ -4,13 +4,24 @@ import cv2
 import cvzone
 import math
 from sort import *
-import os
-import openpyxl
+from openpyxl import Workbook
+from tkinter import messagebox
 
-cap = cv2.VideoCapture("Videos/demo_1.mp4")  # For Video
+
+
+cap = cv2.VideoCapture("../Videos/demo_1.mp4")  # For Video
 model = YOLO("YOLO-Weights/yolov8l.pt")
-classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck"]
-mask = cv2.imread("Object Tracking/mask.png")
+classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
+              "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
+              "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella",
+              "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat",
+              "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup",
+              "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli",
+              "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed",
+              "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone",
+              "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors",
+              "teddy bear", "hair drier", "toothbrush"]
+# mask = cv2.imread("Object Tracking/mask.png")
 tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)  # creating instance
 
 def draw_trajectory(img, trajectories):
@@ -27,8 +38,8 @@ while True:
     success, img = cap.read()
     if not success:
         break
-    imgRegion = cv2.bitwise_and(img, mask)
-    results = model(imgRegion, stream=True)
+    # imgRegion = cv2.bitwise_and(img, mask)
+    results = model(img, stream=True)
     detections = np.empty((0, 5))
     for r in results:
         boxes = r.boxes
@@ -75,10 +86,36 @@ while True:
 # Save last coordinates for each vehicle
 for vehicle_id, positions in trajectories.items():
     last_coordinates[vehicle_id] = positions[-1]
+print("classNames:", classNames)
+print("Detected class index:", cls)
 
 # Print first and last coordinates for each vehicle
 print("First coordinates:")
 print(first_coordinates)
 print("Last coordinates:")
 print(last_coordinates)
+
+# Create a new Workbook
+wb = Workbook()
+
+# Select the active worksheet
+ws = wb.active
+
+# Write headers
+ws.append(["Vehicle ID", "First Coordinate (X)", "First Coordinate (Y)", "Last Coordinate (X)", "Last Coordinate (Y)"])
+
+# Write coordinates data
+for vehicle_id, first_coord in first_coordinates.items():
+    last_coord = last_coordinates.get(vehicle_id, (None, None))  # Get last coordinate or default to (None, None) if not found
+    ws.append([vehicle_id, first_coord[0], first_coord[1], last_coord[0], last_coord[1]])
+
+# Prompt for confirmation
+confirmation = messagebox.askyesno("Confirmation", "Do you want to save the coordinates to Excel file?")
+
+if confirmation:
+    # Save the workbook
+    wb.save("coordinates.xlsx")
+    messagebox.showinfo("Success", "Coordinates have been saved to coordinates.xlsx.")
+else:
+    messagebox.showinfo("Cancelled", "Operation cancelled. No changes have been made.")
 
