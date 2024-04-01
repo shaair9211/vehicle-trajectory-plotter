@@ -86,8 +86,7 @@ while True:
 # Save last coordinates for each vehicle
 for vehicle_id, positions in trajectories.items():
     last_coordinates[vehicle_id] = positions[-1]
-print("classNames:", classNames)
-print("Detected class index:", cls)
+
 
 # Print first and last coordinates for each vehicle
 print("First coordinates:")
@@ -106,7 +105,7 @@ ws.append(["Vehicle ID", "First Coordinate (X)", "First Coordinate (Y)", "Last C
 
 # Write coordinates data
 for vehicle_id, first_coord in first_coordinates.items():
-    last_coord = last_coordinates.get(vehicle_id, (None, None))  # Get last coordinate or default to (None, None) if not found
+    last_coord = last_coordinates.get(vehicle_id, (None, None))
     ws.append([vehicle_id, first_coord[0], first_coord[1], last_coord[0], last_coord[1]])
 
 # Prompt for confirmation
