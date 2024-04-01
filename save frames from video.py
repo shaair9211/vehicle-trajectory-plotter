@@ -47,4 +47,4 @@ def extract_frames_per_second(video_path, output_folder):
     cap.release()
     print(f"Extracted {int(count // fps)} frames and saved them to {output_folder}")
 
-extract_frames_per_second('13_x11july1615hours.mp4', 'output_frames_folder')
+extract_frames_per_second('../Videos/13_x11july1615hours.mp4', 'output_frames_folder')
